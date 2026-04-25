@@ -20,13 +20,24 @@ public class FeatureManager {
     public void enable(String name){
         Feature f = features.get(name);
         if (f != null) {
-            f.enable();
+            f.enable(plugin);
+        }
+    }
+    public void enableAll(){
+        for (Feature f : features.values()){
+            f.enable(plugin);
         }
     }
 
     public void disable(String name){
         Feature f = features.get(name);
         if (f != null) {
+            f.disable();
+        }
+    }
+
+    public void disableAll(){
+        for (Feature f : features.values()){
             f.disable();
         }
     }
