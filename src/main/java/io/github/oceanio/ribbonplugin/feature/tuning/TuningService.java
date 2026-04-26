@@ -1,7 +1,5 @@
-package io.github.oceanio.ribbonplugin.feature.tuner;
+package io.github.oceanio.ribbonplugin.feature.tuning;
 
-import io.github.oceanio.ribbonplugin.feature.tuning.EnchantPool;
-import io.github.oceanio.ribbonplugin.feature.tuning.TuningInput;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.CraftingInventory;
@@ -15,7 +13,7 @@ import java.util.*;
  * リスナーはイベント受け取りと通知のみを担当し、
  * ロール・適用・素材消費の処理はすべてここに委譲する。
  */
-public class TunerService {
+public class TuningService {
 
     private final Random random = new Random();
 

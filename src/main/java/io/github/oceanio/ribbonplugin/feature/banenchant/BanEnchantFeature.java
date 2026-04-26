@@ -8,7 +8,7 @@ public class BanEnchantFeature implements Feature {
     private BanEnchantListener listener;
     private BanEnchantCommand command;
 
-    public BanEnchantFeature(BanEnchantService service){
+    public BanEnchantFeature(BanEnchantService service ){
         this.service = service;
     }
 

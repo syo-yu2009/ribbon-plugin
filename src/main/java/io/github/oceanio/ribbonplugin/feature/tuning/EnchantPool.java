@@ -63,104 +63,88 @@ public class EnchantPool {
 
     private static List<EnchantEntry> swordPool() {
         return Arrays.asList(
-                new EnchantEntry(Enchantment.DAMAGE_ALL),
-                new EnchantEntry(Enchantment.DAMAGE_UNDEAD),
-                new EnchantEntry(Enchantment.DAMAGE_ARTHROPODS),
+                new EnchantEntry(Enchantment.SHARPNESS),
+                new EnchantEntry(Enchantment.SMITE),
+                new EnchantEntry(Enchantment.BANE_OF_ARTHROPODS),
                 new EnchantEntry(Enchantment.FIRE_ASPECT),
                 new EnchantEntry(Enchantment.KNOCKBACK),
-                new EnchantEntry(Enchantment.LOOT_BONUS_MOBS),
+                new EnchantEntry(Enchantment.LOOTING),
                 new EnchantEntry(Enchantment.SWEEPING_EDGE),
-                new EnchantEntry(Enchantment.DURABILITY),
-                new EnchantEntry(Enchantment.MENDING)
+                new EnchantEntry(Enchantment.UNBREAKING)
+
         );
     }
 
     private static List<EnchantEntry> bowPool() {
         return Arrays.asList(
-                new EnchantEntry(Enchantment.ARROW_DAMAGE),
-                new EnchantEntry(Enchantment.ARROW_FIRE),
-                new EnchantEntry(Enchantment.ARROW_KNOCKBACK),
-                new EnchantEntry(Enchantment.ARROW_INFINITE),
-                new EnchantEntry(Enchantment.DURABILITY),
+                new EnchantEntry(Enchantment.POWER),
+                new EnchantEntry(Enchantment.FLAME),
+                new EnchantEntry(Enchantment.PUNCH),
+                new EnchantEntry(Enchantment.INFINITY),
+                new EnchantEntry(Enchantment.UNBREAKING),
                 new EnchantEntry(Enchantment.MULTISHOT),
                 new EnchantEntry(Enchantment.PIERCING),
-                new EnchantEntry(Enchantment.QUICK_CHARGE),
-                new EnchantEntry(Enchantment.MENDING)
+                new EnchantEntry(Enchantment.QUICK_CHARGE)
         );
     }
 
     private static List<EnchantEntry> toolPool() {
         return Arrays.asList(
-                new EnchantEntry(Enchantment.DIG_SPEED),
-                new EnchantEntry(Enchantment.LOOT_BONUS_BLOCKS),
+                new EnchantEntry(Enchantment.EFFICIENCY),
+                new EnchantEntry(Enchantment.FORTUNE),
                 new EnchantEntry(Enchantment.SILK_TOUCH),
-                new EnchantEntry(Enchantment.DURABILITY),
-                new EnchantEntry(Enchantment.MENDING)
+                new EnchantEntry(Enchantment.UNBREAKING)
+        );
+    }
+
+    private static List<EnchantEntry> armorBaseEnchantPool() {
+        return Arrays.asList(
+                new EnchantEntry(Enchantment.PROTECTION),
+                new EnchantEntry(Enchantment.FIRE_PROTECTION),
+                new EnchantEntry(Enchantment.PROJECTILE_PROTECTION),
+                new EnchantEntry(Enchantment.BLAST_PROTECTION),
+                new EnchantEntry(Enchantment.UNBREAKING),
+                new EnchantEntry(Enchantment.THORNS)
         );
     }
 
     private static List<EnchantEntry> helmetPool() {
-        return Arrays.asList(
-                new EnchantEntry(Enchantment.PROTECTION_ENVIRONMENTAL),
-                new EnchantEntry(Enchantment.PROTECTION_FIRE),
-                new EnchantEntry(Enchantment.PROTECTION_PROJECTILE),
-                new EnchantEntry(Enchantment.PROTECTION_EXPLOSIONS),
-                new EnchantEntry(Enchantment.OXYGEN),
-                new EnchantEntry(Enchantment.WATER_WORKER),
-                new EnchantEntry(Enchantment.THORNS),
-                new EnchantEntry(Enchantment.DURABILITY),
-                new EnchantEntry(Enchantment.MENDING)
-        );
+        List<EnchantEntry> list = new ArrayList<>(armorBaseEnchantPool());
+        list.add(new EnchantEntry(Enchantment.FEATHER_FALLING));
+        list.add(new EnchantEntry(Enchantment.FROST_WALKER));
+        list.add(new EnchantEntry(Enchantment.DEPTH_STRIDER));
+        list.add(new EnchantEntry(Enchantment.SOUL_SPEED));
+        return list;
     }
 
     private static List<EnchantEntry> chestPool() {
-        return Arrays.asList(
-                new EnchantEntry(Enchantment.PROTECTION_ENVIRONMENTAL),
-                new EnchantEntry(Enchantment.PROTECTION_FIRE),
-                new EnchantEntry(Enchantment.PROTECTION_PROJECTILE),
-                new EnchantEntry(Enchantment.PROTECTION_EXPLOSIONS),
-                new EnchantEntry(Enchantment.THORNS),
-                new EnchantEntry(Enchantment.DURABILITY),
-                new EnchantEntry(Enchantment.MENDING)
-        );
+        List<EnchantEntry> list = new ArrayList<>(armorBaseEnchantPool());
+        return list;
     }
 
     private static List<EnchantEntry> leggingsPool() {
-        return Arrays.asList(
-                new EnchantEntry(Enchantment.PROTECTION_ENVIRONMENTAL),
-                new EnchantEntry(Enchantment.PROTECTION_FIRE),
-                new EnchantEntry(Enchantment.PROTECTION_PROJECTILE),
-                new EnchantEntry(Enchantment.PROTECTION_EXPLOSIONS),
-                new EnchantEntry(Enchantment.SWIFT_SNEAK),
-                new EnchantEntry(Enchantment.THORNS),
-                new EnchantEntry(Enchantment.DURABILITY),
-                new EnchantEntry(Enchantment.MENDING)
-        );
+        List<EnchantEntry> list = new ArrayList<>(armorBaseEnchantPool());
+        list.add(new EnchantEntry(Enchantment.SWIFT_SNEAK));
+        return list;
     }
 
     private static List<EnchantEntry> bootsPool() {
-        return Arrays.asList(
-                new EnchantEntry(Enchantment.PROTECTION_ENVIRONMENTAL),
-                new EnchantEntry(Enchantment.PROTECTION_FIRE),
-                new EnchantEntry(Enchantment.PROTECTION_FALL),
-                new EnchantEntry(Enchantment.FROST_WALKER),
-                new EnchantEntry(Enchantment.DEPTH_STRIDER),
-                new EnchantEntry(Enchantment.SOUL_SPEED),
-                new EnchantEntry(Enchantment.THORNS),
-                new EnchantEntry(Enchantment.DURABILITY),
-                new EnchantEntry(Enchantment.MENDING)
-        );
+        List<EnchantEntry> list = new ArrayList<>(armorBaseEnchantPool());
+        list.add(new EnchantEntry(Enchantment.DEPTH_STRIDER));
+        list.add(new EnchantEntry(Enchantment.FEATHER_FALLING));
+        list.add(new EnchantEntry(Enchantment.SOUL_SPEED));
+        list.add(new EnchantEntry(Enchantment.FROST_WALKER));
+        return list;
     }
 
     private static List<EnchantEntry> tridentPool() {
         return Arrays.asList(
-                new EnchantEntry(Enchantment.DAMAGE_ALL),
+                new EnchantEntry(Enchantment.SHARPNESS),
                 new EnchantEntry(Enchantment.IMPALING),
                 new EnchantEntry(Enchantment.RIPTIDE),
                 new EnchantEntry(Enchantment.CHANNELING),
                 new EnchantEntry(Enchantment.LOYALTY),
-                new EnchantEntry(Enchantment.DURABILITY),
-                new EnchantEntry(Enchantment.MENDING)
+                new EnchantEntry(Enchantment.UNBREAKING)
         );
     }
 

@@ -1,6 +1,6 @@
-name: javaomg
+name: RibbonPlugins
 version: '1.0-SNAPSHOT'
-main: io.github.oceanio.RibbonPlugin
+main: io.github.oceanio.ribbonplugin.Main
 api-version: '1.21.11'
 
 commands:

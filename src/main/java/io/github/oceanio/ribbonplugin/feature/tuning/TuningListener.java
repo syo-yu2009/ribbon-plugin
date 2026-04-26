@@ -1,6 +1,5 @@
 package io.github.oceanio.ribbonplugin.feature.tuning;
 
-import io.github.oceanio.ribbonplugin.feature.tuner.TunerService;
 import org.bukkit.ChatColor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -17,16 +16,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.*;
 
 /**
- * クラフト台イベントを受け取り、TunerService に処理を委譲するリスナー。
+ * クラフト台イベントを受け取り、TuningService に処理を委譲するリスナー。
  * イベントの受け取り・プレビュー表示・プレイヤー通知のみを担当する。
  */
 public class TuningListener implements Listener {
 
     private final JavaPlugin plugin;
-    private final TunerService tunerService = new TunerService();
+    private final TuningService tuningService;
 
-    public TuningListener(JavaPlugin plugin) {
+    public TuningListener(JavaPlugin plugin, TuningService tuningService) {
         this.plugin = plugin;
+        this.tuningService = tuningService;
     }
 
     // ---------------------------------------------------------------
@@ -55,7 +55,7 @@ public class TuningListener implements Listener {
     }
 
     // ---------------------------------------------------------------
-    // クラフト確定 → TunerService に委譲
+    // クラフト確定 → TuningService に委譲
     // ---------------------------------------------------------------
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -69,15 +69,15 @@ public class TuningListener implements Listener {
         event.setCancelled(true);
 
         // ロール
-        Map<Enchantment, Integer> enchants = tunerService.rollEnchants(input.targetItem());
+        Map<Enchantment, Integer> enchants = tuningService.rollEnchants(input.targetItem());
         if (enchants.isEmpty()) {
             player.sendMessage(ChatColor.RED + "このアイテムはチューニングできません。");
             return;
         }
 
         // エンチャント適用 & 素材消費
-        ItemStack result = tunerService.applyEnchants(input.targetItem(), enchants);
-        tunerService.consumeIngredients(inv);
+        ItemStack result = tuningService.applyEnchants(input.targetItem(), enchants);
+        tuningService.consumeIngredients(inv);
 
         // プレイヤーに渡す（満杯なら足元にドロップ）
         player.getInventory().addItem(result)
