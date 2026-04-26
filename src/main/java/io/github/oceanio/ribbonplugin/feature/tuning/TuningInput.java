@@ -5,63 +5,41 @@ import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-/**
- * クラフトグリッドを解析して「対象アイテム」を保持する値クラス。
- * 有効な組み合わせでない場合は null を返す。
- *
- * 有効な組み合わせ（順不同）:
- *   - 腐肉 × 1以上
- *   - エメラルド × 1以上
- *   - 武器/ツール/防具 × 1
- *   - それ以外のアイテムは不可
- */
-public record TuningInput(ItemStack targetItem) {
+public record TuningInput(ItemStack targetItem, int emeraldCount, int rottenFleshCount) {
 
-    /**
-     * グリッドを解析して TuningInput を返す。
-     * 無効な配置なら null。
-     */
     public static TuningInput parse(JavaPlugin plugin, CraftingInventory inv) {
-        ItemStack[] matrix = inv.getMatrix();
-
         ItemStack target = null;
-        boolean hasFlesh = false;
-        boolean hasEmerald = false;
+        int emeralds = 0;
+        int flesh = 0;
 
-        for (ItemStack slot : matrix) {
-            if (slot == null || slot.getType() == Material.AIR) continue;
+        for (ItemStack item : inv.getMatrix()) {
+            if (item == null || item.getType() == Material.AIR) continue;
 
-            if (slot.getType() == Material.ROTTEN_FLESH) {
-                hasFlesh = true;
-            } else if (slot.getType() == Material.EMERALD) {
-                hasEmerald = true;
-            } else if (isTunable(slot)) {
-                if (target != null) return null; // 装備は1個だけ
-                target = slot;
+            if (isEquipment(item)) {
+                if (target != null) return null; // 装備が2つ以上ある場合は無効
+                target = item;
+            } else if (item.getType() == Material.EMERALD) {
+                emeralds += item.getAmount();
+            } else if (item.getType() == Material.ROTTEN_FLESH) {
+                flesh += item.getAmount();
             } else {
-                return null; // 想定外のアイテム
+                return null; // 関係ないアイテムが混ざっている
             }
         }
 
-        if (target == null || !hasFlesh || !hasEmerald) return null;
-        return new TuningInput(target);
+        // 装備1つ、エメラルド1つ以上、腐肉1つ以上が必要
+        if (target == null || emeralds == 0 || flesh == 0) return null;
+
+        return new TuningInput(target, emeralds, flesh);
     }
 
-    /** エンチャント対象として有効なアイテムか判定。 */
-    static boolean isTunable(ItemStack item) {
-        String type = item.getType().name();
-        return type.endsWith("_SWORD")
-                || type.endsWith("_AXE")
-                || type.endsWith("_PICKAXE")
-                || type.endsWith("_SHOVEL")
-                || type.endsWith("_HOE")
-                || type.endsWith("_HELMET")
-                || type.endsWith("_CHESTPLATE")
-                || type.endsWith("_LEGGINGS")
-                || type.endsWith("_BOOTS")
-                || type.equals("BOW")
-                || type.equals("CROSSBOW")
-                || type.equals("TRIDENT");
+    private static boolean isEquipment(ItemStack item) {
+        String name = item.getType().name();
+        return name.endsWith("_HELMET") || name.endsWith("_CHESTPLATE") ||
+                name.endsWith("_LEGGINGS") || name.endsWith("_BOOTS") ||
+                name.endsWith("_SWORD") || name.endsWith("_AXE") ||
+                name.endsWith("_PICKAXE") || name.endsWith("_SHOVEL") ||
+                name.endsWith("_HOE") || item.getType() == Material.TRIDENT ||
+                item.getType() == Material.BOW || item.getType() == Material.CROSSBOW;
     }
 }
-

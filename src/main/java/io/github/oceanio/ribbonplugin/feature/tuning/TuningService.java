@@ -4,86 +4,44 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.util.*;
-
-/**
- * チューニングのビジネスロジックを集約するサービスクラス。
- *
- * リスナーはイベント受け取りと通知のみを担当し、
- * ロール・適用・素材消費の処理はすべてここに委譲する。
- */
 public class TuningService {
 
-    private final Random random = new Random();
+    // ここで確実に初期化する
+    private final EnchantPool pool = new EnchantPool();
 
-    // ---------------------------------------------------------------
-    // エンチャントのロールと適用
-    // ---------------------------------------------------------------
+    public Map<Enchantment, Integer> rollEnchantment(ItemStack item) {
+        Map<Enchantment, Integer> result = new HashMap<>();
 
-    /**
-     * アイテムに対してエンチャントをランダムにロールして返す。
-     * 対象外アイテムの場合は空の Map を返す。
-     */
-    public Map<Enchantment, Integer> rollEnchants(ItemStack item) {
-        return EnchantPool.roll(item, random);
-    }
+        // 最大10回試行（アイテムに付与できないエンチャントが選ばれた時のため）
+        for (int i = 0; i < 10; i++) {
+            EnchantPool.EnchantEntry entry = pool.getRandomEntry();
+            if (entry == null) break;
 
-    /**
-     * アイテムの既存エンチャントをリセットし、指定したエンチャントを付与した
-     * 新しい ItemStack を返す（元のアイテムは変更しない）。
-     */
-    public ItemStack applyEnchants(ItemStack item, Map<Enchantment, Integer> enchants) {
-        ItemStack result = item.clone();
-        // 既存エンチャントを全削除
-        new ArrayList<>(result.getEnchantments().keySet())
-                .forEach(result::removeEnchantment);
-        // 新エンチャントを付与（互換性チェックなし）
-        enchants.forEach((e, lvl) -> result.addUnsafeEnchantment(e, lvl));
+            // そのアイテム（剣や防具など）に付与可能かチェック
+            if (entry.getEnchantment().canEnchantItem(item)) {
+                result.put(entry.getEnchantment(), entry.getLevel());
+                break;
+            }
+        }
+
         return result;
     }
 
-    // ---------------------------------------------------------------
-    // 素材の消費
-    // ---------------------------------------------------------------
-
-    /**
-     * クラフトグリッドから腐肉・エメラルド・対象アイテムを
-     * それぞれ1個ずつ消費してグリッドに書き戻す。
-     */
     public void consumeIngredients(CraftingInventory inv) {
-        ItemStack[] matrix = inv.getMatrix();
-        boolean fleshConsumed   = false;
-        boolean emeraldConsumed = false;
-        boolean targetConsumed  = false;
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack item = inv.getItem(i);
+            if (item == null || item.getType() == Material.AIR) continue;
 
-        for (int i = 0; i < matrix.length; i++) {
-            ItemStack slot = matrix[i];
-            if (slot == null || slot.getType() == Material.AIR) continue;
-
-            if (!fleshConsumed && slot.getType() == Material.ROTTEN_FLESH) {
-                decrementOrNull(matrix, i, slot);
-                fleshConsumed = true;
-            } else if (!emeraldConsumed && slot.getType() == Material.EMERALD) {
-                decrementOrNull(matrix, i, slot);
-                emeraldConsumed = true;
-            } else if (!targetConsumed && TuningInput.isTunable(slot)) {
-                matrix[i] = null;
-                targetConsumed = true;
+            // クラフト枠内の全アイテムを1個ずつ減らす
+            int amount = item.getAmount() - 1;
+            if (amount <= 0) {
+                inv.setItem(i, null);
+            } else {
+                item.setAmount(amount);
             }
-        }
-        inv.setMatrix(matrix);
-    }
-
-    // ---------------------------------------------------------------
-    // 内部ヘルパー
-    // ---------------------------------------------------------------
-
-    private void decrementOrNull(ItemStack[] matrix, int i, ItemStack slot) {
-        if (slot.getAmount() <= 1) {
-            matrix[i] = null;
-        } else {
-            slot.setAmount(slot.getAmount() - 1);
         }
     }
 }

@@ -1,6 +1,7 @@
 package io.github.oceanio.ribbonplugin.feature.tuning;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,53 +11,36 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.util.Map;
 
-import java.util.*;
-
-/**
- * クラフト台イベントを受け取り、TuningService に処理を委譲するリスナー。
- * イベントの受け取り・プレビュー表示・プレイヤー通知のみを担当する。
- */
 public class TuningListener implements Listener {
-
     private final JavaPlugin plugin;
-    private final TuningService tuningService;
+    private final TuningService service;
 
-    public TuningListener(JavaPlugin plugin, TuningService tuningService) {
+    public TuningListener(JavaPlugin plugin, TuningService service) {
         this.plugin = plugin;
-        this.tuningService = tuningService;
+        this.service = service;
     }
-
-    // ---------------------------------------------------------------
-    // クラフトプレビュー
-    // ---------------------------------------------------------------
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPrepare(PrepareItemCraftEvent event) {
-        CraftingInventory inv = event.getInventory();
-        TuningInput input = TuningInput.parse(plugin, inv);
+        TuningInput input = TuningInput.parse(plugin, event.getInventory());
         if (input == null) return;
 
-        ItemStack preview = input.targetItem().clone();
-        ItemMeta meta = preview.getItemMeta();
-        if (meta != null) {
-            List<String> lore = meta.hasLore()
-                    ? new ArrayList<>(Objects.requireNonNull(meta.getLore()))
-                    : new ArrayList<>();
-            lore.add("");
-            lore.add(ChatColor.LIGHT_PURPLE + "▶ クリックでエンチャントを振り直す");
-            lore.add(ChatColor.GRAY + "エンチャントスロット: 5〜7（ランダム）");
-            meta.setLore(lore);
-            preview.setItemMeta(meta);
+        // 上限5つチェック
+        if (input.targetItem().getEnchantments().size() >= 5) {
+            return;
         }
-        event.getInventory().setResult(preview);
-    }
 
-    // ---------------------------------------------------------------
-    // クラフト確定 → TuningService に委譲
-    // ---------------------------------------------------------------
+        ItemStack result = input.targetItem().clone();
+        var meta = result.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ChatColor.YELLOW + "??? エンチャント付与");
+            result.setItemMeta(meta);
+        }
+        event.getInventory().setResult(result);
+    }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onCraft(CraftItemEvent event) {
@@ -66,44 +50,26 @@ public class TuningListener implements Listener {
         TuningInput input = TuningInput.parse(plugin, inv);
         if (input == null) return;
 
-        event.setCancelled(true);
-
-        // ロール
-        Map<Enchantment, Integer> enchants = tuningService.rollEnchants(input.targetItem());
-        if (enchants.isEmpty()) {
-            player.sendMessage(ChatColor.RED + "このアイテムはチューニングできません。");
+        if (input.targetItem().getEnchantments().size() >= 5) {
+            player.sendMessage(ChatColor.RED + "このアイテムには既に5つのエンチャントが付いています！");
+            event.setCancelled(true);
             return;
         }
 
-        // エンチャント適用 & 素材消費
-        ItemStack result = tuningService.applyEnchants(input.targetItem(), enchants);
-        tuningService.consumeIngredients(inv);
+        event.setCancelled(true); // バニラのクラフトをキャンセルして独自処理
 
-        // プレイヤーに渡す（満杯なら足元にドロップ）
-        player.getInventory().addItem(result)
-                .values()
-                .forEach(drop -> player.getWorld().dropItemNaturally(player.getLocation(), drop));
+        // ランダムエンチャント決定
+        Map<Enchantment, Integer> enchants = service.rollEnchantment(input.targetItem());
+        ItemStack result = input.targetItem().clone();
 
-        // 通知
-        player.sendMessage(ChatColor.LIGHT_PURPLE + "✦ チューニング完了！");
-        enchants.forEach((e, lvl) ->
-                player.sendMessage(ChatColor.GRAY + "  " + formatEnchant(e, lvl))
-        );
-    }
+        enchants.forEach((ench, lvl) -> result.addUnsafeEnchantment(ench, lvl));
 
-    // ---------------------------------------------------------------
-    // 表示ヘルパー（通知専用のため Listener に残す）
-    // ---------------------------------------------------------------
+        // 素材消費とアイテム付与
+        service.consumeIngredients(inv);
+        player.getInventory().addItem(result).values().forEach(drop ->
+                player.getWorld().dropItemNaturally(player.getLocation(), drop));
 
-    private String formatEnchant(Enchantment e, int level) {
-        String name = e.getKey().getKey().replace("_", " ");
-        String[] roman = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"};
-        String lvlStr = (level > 0 && level < roman.length) ? roman[level] : String.valueOf(level);
-        return ChatColor.WHITE + capitalize(name) + " " + ChatColor.YELLOW + lvlStr;
-    }
-
-    private String capitalize(String s) {
-        if (s == null || s.isEmpty()) return s;
-        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+        player.playSound(player.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0f, 1.0f);
+        player.sendMessage(ChatColor.GREEN + "エンチャントが完了しました！");
     }
 }
