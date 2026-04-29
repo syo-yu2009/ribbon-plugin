@@ -10,7 +10,7 @@ public class ConfigManager {
     private final JavaPlugin plugin;
 
     private final Set<Enchantment> banned = new HashSet<>();
-    private final Map<String, List<Enchantment>> pools = new HashMap<>();
+    private final Map<String, List<Enchantment>> tuningpools = new HashMap<>();
 
     public ConfigManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -18,7 +18,7 @@ public class ConfigManager {
 
     public void load() {
         banned.clear();
-        pools.clear();
+        tuningpools.clear();
 
         loadBans();
         loadPools();
@@ -46,7 +46,7 @@ public class ConfigManager {
                 if (e != null) enchants.add(e);
             }
 
-            pools.put(key, enchants);
+            tuningpools.put(key, enchants);
         }
     }
 }
